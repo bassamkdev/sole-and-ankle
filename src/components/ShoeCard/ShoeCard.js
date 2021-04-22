@@ -5,6 +5,7 @@ import { COLORS, WEIGHTS } from '../../constants';
 import { formatPrice, pluralize, isNewShoe } from '../../utils';
 import Spacer from '../Spacer';
 
+
 const ShoeCard = ({
   slug,
   name,
@@ -25,25 +26,42 @@ const ShoeCard = ({
   // both on-sale and new-release, but in this case, `on-sale`
   // will triumph and be the variant used.
   // prettier-ignore
+  const VARIANT = {
+    'on-sale': {
+      '--background-color': COLORS.primary,
+      '--color': COLORS.gray[700],
+      '--text-decoration': 'line-through'
+    },
+    'new-release': {
+      '--background-color': COLORS.secondary,
+      '--color': 'inherit'
+    }
+  }
+
   const variant = typeof salePrice === 'number'
     ? 'on-sale'
     : isNewShoe(releaseDate)
       ? 'new-release'
       : 'default'
 
+      const styles = VARIANT[variant]
   return (
     <Link href={`/shoe/${slug}`}>
       <Wrapper>
         <ImageWrapper>
           <Image alt="" src={imageSrc} />
         </ImageWrapper>
+        {
+          variant === 'default' ? null : <Flag style={styles}>{variant === 'new-release' ? 'just released' : 'sale' }</Flag>
+        }
         <Spacer size={12} />
         <Row>
           <Name>{name}</Name>
-          <Price>{formatPrice(price)}</Price>
+          <Price style={styles}>{formatPrice(price)}</Price>
         </Row>
         <Row>
           <ColorInfo>{pluralize('Color', numOfColors)}</ColorInfo>
+          {variant === 'on-sale' ? <SalePrice >{formatPrice(salePrice)}</SalePrice>: null}
         </Row>
       </Wrapper>
     </Link>
@@ -55,16 +73,24 @@ const Link = styled.a`
   color: inherit;
 `;
 
-const Wrapper = styled.article``;
-
-const ImageWrapper = styled.div`
+const Wrapper = styled.article`
   position: relative;
 `;
 
-const Image = styled.img``;
+const ImageWrapper = styled.div`
+  position: relative;
+  border-radius: 16px 16px 4px 4px;
+  overflow: hidden;
+`;
+
+const Image = styled.img`
+  width: 340px;
+`;
 
 const Row = styled.div`
   font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
 `;
 
 const Name = styled.h3`
@@ -72,11 +98,27 @@ const Name = styled.h3`
   color: ${COLORS.gray[900]};
 `;
 
-const Price = styled.span``;
+const Price = styled.span`
+  color: var(--color);
+  text-decoration: var(--text-decoration)
+`;
 
 const ColorInfo = styled.p`
   color: ${COLORS.gray[700]};
 `;
+
+const Flag = styled.div`
+  position: absolute;
+  top: 12px;
+  right: -4px;
+  padding: 7px 11px;
+  border-radius: 2px;
+  color: ${COLORS.white};
+  background-color: var(--background-color);
+  font-size: ${14/16}rem;
+  font-weight: 700;
+  text-transform: capitalize;
+`
 
 const SalePrice = styled.span`
   font-weight: ${WEIGHTS.medium};
